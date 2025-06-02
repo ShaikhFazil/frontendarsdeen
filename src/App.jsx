@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { ThemeProvider } from "@/contexts/theme-context";
 import Layout from "@/routes/layout";
@@ -7,6 +7,9 @@ import DashboardPage from "@/routes/dashboard/page";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
+import { setUser } from "./redux/authSlice";
+import axios from "axios";
 
 const PrivateRoute = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
@@ -14,6 +17,19 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
+
+
+ const dispatch = useDispatch();
+
+ useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(setUser({ token }));
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, [dispatch]);
+
   const router = createBrowserRouter([
     {
       path: "/login",

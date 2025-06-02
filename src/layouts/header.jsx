@@ -13,7 +13,7 @@ import { USER_API_END_POINT } from "@/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
-import { setUser } from "@/redux/authSlice";
+import { logout, setUser } from "@/redux/authSlice";
 
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
@@ -22,22 +22,30 @@ export const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate()
   console.log(user)
 
-  const logOutHandler = async (e) => {
+const logOutHandler = async () => {
     try {
-      const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true })
+        const res = await axios.get(`${USER_API_END_POINT}/logout`, { 
+            withCredentials: true 
+        });
 
-      if (res.data.success) {
-        dispatch(setUser(null))
-        navigate('/');
-        toast.success(res.data.message)
-      }
-
+        if (res.data.success) {
+            // Clear all auth storage
+            localStorage.removeItem("token");
+            sessionStorage.removeItem("token");
+            delete axios.defaults.headers.common["Authorization"];
+            
+            // Dispatch logout action
+            dispatch(logout());
+            
+            // Navigate to login
+            navigate("/login");
+            toast.success(res.data.message);
+        }
+    } catch (error) {
+        console.error("Logout error:", error);
+        toast.error(error.response?.data?.message || "Logout failed");
     }
-    catch (error) {
-      console.log(error)
-      toast.error(error.response.data.message)
-    }
-  }
+};
 
     return (
         <header className="relative z-10 flex h-[60px] items-center justify-between bg-white px-4 shadow-md transition-colors dark:bg-slate-900">

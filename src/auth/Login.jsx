@@ -40,30 +40,39 @@ const Login = () => {
         setInput({ ...input, [e.target.name]: e.target.value });
     };
 
-    const submitHandler = async (e) => {
-        e.preventDefault();
+const submitHandler = async (e) => {
+  e.preventDefault();
 
-        try {
-             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            });
-            if (res.data.success) {
-                dispatch(setUser(res.data.user));
-                navigate("/");
+  try {
+    setLoading(true);
+    const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
 
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
-        } finally {
-           setLoading(false); 
-        }
-    };
+    if (res.data.success) {
+      const { token, user } = res.data;
+
+      // Store in both localStorage and Redux
+      localStorage.setItem("token", token);
+      dispatch(setUser({ user, token })); // Pass both user and token
+      
+      // Set default axios header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      navigate("/");
+      toast.success(res.data.message);
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     return (
         <div>

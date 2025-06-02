@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
     punchInStart,
@@ -16,29 +16,44 @@ import { ATTENDANCE_API_END_POINT } from "@/constants/index";
 
 const useAttendance = () => {
     const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
 
-    const punchIn = async () => {
-        try {
-            dispatch(punchInStart());
-            const res = await axios.post(`${ATTENDANCE_API_END_POINT}/punch-in`, {},  {
-                withCredentials: true,
-                headers: {
-                  'Content-Type': 'application/json',
-                }
-              });
-            dispatch(punchInSuccess(res.data));
-            toast.success("Punched in successfully");
-        } catch (error) {
-            dispatch(punchInFailure(error.response?.data?.message || error.message));
-            toast.error(error.response?.data?.message || "Failed to punch in");
-        }
-    };
+   const punchIn = async () => {
+    try {
+      dispatch(punchInStart());
+      
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
 
-    const punchOut = async () => {
+      const res = await axios.post(`${ATTENDANCE_API_END_POINT}/punch-in`, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        withCredentials: true
+      });
+      
+      dispatch(punchInSuccess(res.data));
+      toast.success("Punched in successfully");
+      return res.data;
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message;
+      dispatch(punchInFailure(errorMsg));
+      toast.error(errorMsg);
+      throw error;
+    }
+  };
+
+  const punchOut = async () => {
         try {
             dispatch(punchOutStart());
+            // const token = localStorage.getItem("token");
             const res = await axios.post(`${ATTENDANCE_API_END_POINT}/punch-out`, {}, {
-                withCredentials: true
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
             });
             dispatch(punchOutSuccess(res.data));
             toast.success("Punched out successfully");
@@ -48,11 +63,15 @@ const useAttendance = () => {
         }
     };
 
-    const getMyAttendance = async () => {
+       const getMyAttendance = async () => {
         try {
             dispatch(getMyAttendanceStart());
+            // const token = localStorage.getItem("token");
             const res = await axios.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
-                withCredentials: true
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
             });
             dispatch(getMyAttendanceSuccess(res.data));
         } catch (error) {
