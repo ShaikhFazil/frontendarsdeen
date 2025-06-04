@@ -27,13 +27,12 @@ const Login = () => {
     const {  user } = useSelector((store) => store.auth);
     const dispatch = useDispatch();
 
-    console.log(user);
-
- useEffect(() => {
-    if (user) {
-        navigate("/");
-    }
-}, [user]);
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (token && user) {
+    navigate("/");
+  }
+}, [user, navigate]);
 
 
     const changeEventhandler = (e) => {
@@ -66,7 +65,6 @@ const submitHandler = async (e) => {
       toast.success(res.data.message);
     }
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Login failed");
   } finally {
     setLoading(false);

@@ -72,7 +72,6 @@ const Signup = () => {
                 toast.success(res.data.message);
             }
         } catch (error) {
-            console.error("Error response:", error.response?.data);
             toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false);

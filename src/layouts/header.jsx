@@ -20,7 +20,6 @@ export const Header = ({ collapsed, setCollapsed }) => {
       const { user } = useSelector(store => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate()
-  console.log(user)
 
 const logOutHandler = async () => {
     try {
@@ -42,7 +41,6 @@ const logOutHandler = async () => {
             toast.success(res.data.message);
         }
     } catch (error) {
-        console.error("Logout error:", error);
         toast.error(error.response?.data?.message || "Logout failed");
     }
 };
