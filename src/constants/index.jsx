@@ -272,11 +272,11 @@ export const navbarLinks = [
 //     },
 // ];
 
-// export const backend_url = "https://updatedbackend-2.onrender.com/api"
+export const backend_url = "https://updatedbackend-2.onrender.com/api"
 
 // http://localhost:3000
 
-export const backend_url = "http://localhost:8000/api"
+// export const backend_url = "http://localhost:8000/api"
 
 export const USER_API_END_POINT = `${backend_url}/v1/user`;
 
