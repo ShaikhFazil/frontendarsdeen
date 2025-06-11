@@ -22,14 +22,20 @@ const useAttendance = () => {
     const dispatch = useDispatch();
     const { token } = useSelector((state) => state.auth);
 
+    // const getLocationName = async (lat, lng) => {
+    //     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+    //         headers: {
+    //             "User-Agent": "my-attendance-app (fsayed620@gmail.com)",
+    //         },
+    //     });
+    //     const data = await res.json();
+    //     return data.display_name;
+    // };
     const getLocationName = async (lat, lng) => {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
-            headers: {
-                "User-Agent": "my-attendance-app (fsayed620@gmail.com)",
-            },
-        });
+        const apiKey = "72c1ae0c9cee44c99162d52ed007fdce";
+        const res = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}`);
         const data = await res.json();
-        return data.display_name;
+        return data?.results?.[0]?.formatted || "Unknown location";
     };
 
     const punchIn = async () => {
@@ -120,21 +126,21 @@ const useAttendance = () => {
         }
     };
 
- const deleteAttendance = async (id) => {
-    try {
-        dispatch(deleteAttendanceStart());
+    const deleteAttendance = async (id) => {
+        try {
+            dispatch(deleteAttendanceStart());
 
-        await axiosInstance.delete(`${ATTENDANCE_API_END_POINT}/delete/${id}`);
+            await axiosInstance.delete(`${ATTENDANCE_API_END_POINT}/delete/${id}`);
 
-        dispatch(deleteAttendanceSuccess(id));
-        toast.success("Attendance record deleted successfully");
-         return true; 
-    } catch (error) {
-        dispatch(deleteAttendanceFailure(error.response?.data?.message || error.message));
-        toast.error(error.response?.data?.message || "Failed to delete attendance record");
-         return false; 
-    }
-};
+            dispatch(deleteAttendanceSuccess(id));
+            toast.success("Attendance record deleted successfully");
+            return true;
+        } catch (error) {
+            dispatch(deleteAttendanceFailure(error.response?.data?.message || error.message));
+            toast.error(error.response?.data?.message || "Failed to delete attendance record");
+            return false;
+        }
+    };
 
     return { punchIn, punchOut, getMyAttendance, deleteAttendance };
 };
