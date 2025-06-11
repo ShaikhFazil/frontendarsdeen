@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { ATTENDANCE_API_END_POINT } from "@/constants/index";
+import axiosInstance from "@/utils/axiosConfig";
 
 const useGetAttendance = () => {
     const dispatch = useDispatch();
@@ -20,7 +21,7 @@ const useGetAttendance = () => {
 
             if (!token) throw new Error("No authentication token found");
 
-            const res = await axios.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
+            const res = await axiosInstance.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },

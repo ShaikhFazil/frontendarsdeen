@@ -9,35 +9,63 @@ import Signup from "@/auth/Signup";
 import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { setUser } from "./redux/authSlice";
-import axios from "axios";
+import axios from '@/utils/axiosConfig';
 import Task from "./components/Task";
 import AdminRoute from "./utils/AdminRoute";
 import EmployeeRoute from "./utils/EmployeeRoute";
 import EmployeeTask from "./components/EmployeeTask";
 
+// const PrivateRoute = ({ children }) => {
+//   const { user, token } = useSelector((state) => state.auth);
+//   const [isLoading, setIsLoading] = useState(true);
+
+//   useEffect(() => {
+//     // Check if we have a token in localStorage but not in Redux yet
+//     const localStorageToken = localStorage.getItem('token');
+//     if (localStorageToken && !token) {
+//       // Wait for Redux to rehydrate
+//       const timer = setTimeout(() => {
+//         setIsLoading(false);
+//       }, 500);
+//       return () => clearTimeout(timer);
+//     } else {
+//       setIsLoading(false);
+//     }
+//   }, [token]);
+
+//   if (isLoading) {
+//     return <div>Loading...</div>; // Or a proper loading spinner
+//   }
+
+//   return user ? children : <Navigate to="/login" replace />;
+// };
+
 const PrivateRoute = ({ children }) => {
-  const { user, token } = useSelector((state) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Check if we have a token in localStorage but not in Redux yet
-    const localStorageToken = localStorage.getItem('token');
-    if (localStorageToken && !token) {
-      // Wait for Redux to rehydrate
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else {
-      setIsLoading(false);
-    }
-  }, [token]);
+    // Set up response interceptor for this component
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 500) {
+          return Promise.reject(error);
+        }
+        return Promise.reject(error);
+      }
+    );
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return () => {
+      // Clean up interceptor
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  return children;
 };
 
 function App() {

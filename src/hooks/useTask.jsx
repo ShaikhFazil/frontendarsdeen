@@ -16,6 +16,7 @@ import {
 } from "../redux/taskSlice";
 import axios from "axios";
 import { TASK_API_END_POINT } from "@/constants/index";
+import axiosInstance from "@/utils/axiosConfig";
 
 const useTask = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ const useTask = () => {
 const fetchTasks = async () => {
   try {
     dispatch(fetchTasksStart());
-    const res = await axios.get(TASK_API_END_POINT, {
+    const res = await axiosInstance.get(TASK_API_END_POINT, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -46,7 +47,7 @@ const fetchTasks = async () => {
   const createTask = async (taskData) => {
     try {
       dispatch(createTaskStart());
-      const res = await axios.post(TASK_API_END_POINT, taskData, {
+      const res = await axiosInstance.post(TASK_API_END_POINT, taskData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -66,7 +67,7 @@ const fetchTasks = async () => {
   const updateTask = async (id, taskData) => {
     try {
       dispatch(updateTaskStart());
-      const res = await axios.put(`${TASK_API_END_POINT}/${id}`, taskData, {
+      const res = await axiosInstance.put(`${TASK_API_END_POINT}/${id}`, taskData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -87,7 +88,7 @@ const fetchTasks = async () => {
     try {
         console.log("Deleting task with ID:", id);
       dispatch(deleteTaskStart());
-      await axios.delete(`${TASK_API_END_POINT}/${id}`, {
+      await axiosInstance.delete(`${TASK_API_END_POINT}/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

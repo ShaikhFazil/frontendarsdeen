@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
 import { logout, setUser } from "@/redux/authSlice";
+import axiosInstance from "@/utils/axiosConfig";
 
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
@@ -23,7 +24,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
 const logOutHandler = async () => {
     try {
-        const res = await axios.get(`${USER_API_END_POINT}/logout`, { 
+        const res = await axiosInstance.get(`${USER_API_END_POINT}/logout`, { 
             withCredentials: true 
         });
 

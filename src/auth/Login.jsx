@@ -12,6 +12,7 @@ import { Loader } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
 import darkText from "@/assets/blacktext.png";
 import whiteText from "@/assets/whitetext.png";
+import axiosInstance from "@/utils/axiosConfig";
 
 const Login = () => {
     const [input, setInput] = useState({
@@ -44,7 +45,7 @@ const submitHandler = async (e) => {
 
   try {
     setLoading(true);
-    const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+    const res = await axiosInstance.post(`${USER_API_END_POINT}/login`, input, {
       headers: {
         "Content-Type": "application/json",
       },

@@ -16,6 +16,7 @@ import {
 } from "../redux/attendanceSlice";
 import axios from "axios";
 import { ATTENDANCE_API_END_POINT } from "@/constants/index";
+import axiosInstance from "@/utils/axiosConfig";
 
 const useAttendance = () => {
     const dispatch = useDispatch();
@@ -42,7 +43,7 @@ const useAttendance = () => {
             const { latitude, longitude } = position.coords;
             const locationName = await getLocationName(latitude, longitude);
 
-            const res = await axios.post(
+            const res = await axiosInstance.post(
                 `${ATTENDANCE_API_END_POINT}/punch-in`,
                 {
                     locationName,
@@ -81,7 +82,7 @@ const useAttendance = () => {
             const locationName = locationData.display_name || "Unknown location";
 
             // Send location to backend
-            const res = await axios.post(
+            const res = await axiosInstance.post(
                 `${ATTENDANCE_API_END_POINT}/punch-out`,
                 {
                     locationName,
@@ -107,7 +108,7 @@ const useAttendance = () => {
         try {
             dispatch(getMyAttendanceStart());
             // const token = localStorage.getItem("token");
-            const res = await axios.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
+            const res = await axiosInstance.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
                 withCredentials: true,
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -123,7 +124,7 @@ const useAttendance = () => {
     try {
         dispatch(deleteAttendanceStart());
 
-        await axios.delete(`${ATTENDANCE_API_END_POINT}/delete/${id}`);
+        await axiosInstance.delete(`${ATTENDANCE_API_END_POINT}/delete/${id}`);
 
         dispatch(deleteAttendanceSuccess(id));
         toast.success("Attendance record deleted successfully");

@@ -12,6 +12,7 @@ import { Loader } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
 import darkText from "@/assets/blacktext.png";
 import whiteText from "@/assets/whitetext.png";
+import axiosInstance from "@/utils/axiosConfig";
 
 const Signup = () => {
     const [input, setInput] = useState({
@@ -60,7 +61,7 @@ const Signup = () => {
         }
         try {
             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
+            const res = await axiosInstance.post(`${USER_API_END_POINT}/register`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
