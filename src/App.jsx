@@ -10,11 +10,13 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { setUser } from "./redux/authSlice";
 import axios from "axios";
+import Task from "./components/Task";
+import AdminRoute from "./utils/AdminRoute";
 
 const PrivateRoute = ({ children }) => {
   const { user, token } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
-
+console.log(user)
   useEffect(() => {
     // Check if we have a token in localStorage but not in Redux yet
     const localStorageToken = localStorage.getItem('token');
@@ -75,10 +77,14 @@ useEffect(() => {
           index: true,
           element: <DashboardPage />,
         },
-        // {
-        //   path: "analytics",
-        //   element: <h1 className="title">Analytics</h1>,
-        // },
+        {
+          path: "task",
+          element: (
+            <AdminRoute>
+              <Task />
+            </AdminRoute>
+          ),
+        },
         // {
         //   path: "reports",
         //   element: <h1 className="title">Reports</h1>,

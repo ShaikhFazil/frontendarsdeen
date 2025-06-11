@@ -8,24 +8,111 @@ export const formatDateSafe = (date, dateFormat) => {
     return isValid(dateObj) ? format(dateObj, dateFormat) : "Invalid Date";
 };
 
-export const calculateDuration = (punchIn, punchOut) => {
-    if (!punchIn || !punchOut) return "N/A";
+export function calculateDuration(punchIn, punchOut) {
+  if (!punchIn || !punchOut) return "N/A";
 
-    const start = new Date(punchIn);
-    const end = new Date(punchOut);
+  const inTime = new Date(punchIn);
+  const outTime = new Date(punchOut);
+  const diffMs = outTime - inTime;
 
-    if (!isValid(start) || !isValid(end)) return "Invalid Date";
+  if (isNaN(diffMs) || diffMs < 0) return "N/A";
 
-    const durationMs = end - start;
-    const durationSeconds = Math.floor(durationMs / 1000);
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
-    // Calculate hours, minutes, seconds
-    const hours = Math.floor(durationSeconds / 3600);
-    const minutes = Math.floor((durationSeconds % 3600) / 60);
-    const seconds = durationSeconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
-    // Format with leading zeros
-    const formatNumber = (num) => num.toString().padStart(2, "0");
 
-    return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;
+export const getLightBorder = (status) => {
+  switch (status) {
+    case "Pending":
+      return "border-l-yellow-500";
+    case "In Progress":
+      return "border-l-orange-500";
+    case "Completed":
+      return "border-l-green-600";
+    default:
+      return "";
+  }
 };
+
+ export const getDarkBorder = (status) => {
+  switch (status) {
+    case "Pending":
+      return "dark:border-l-yellow-500";
+    case "In Progress":
+      return "dark:border-l-orange-500";
+    case "Completed":
+      return "dark:border-l-green-600";
+    default:
+      return "";
+  }
+};
+
+ export const getBadgeBg = (status) => {
+  switch (status) {
+    case "Pending":
+      return "bg-yellow-500";
+    case "In Progress":
+      return "bg-orange-500";
+    case "Completed":
+      return "bg-green-600";
+    default:
+      return "";
+  }
+};
+
+export const taskData = [
+  {
+    id: 1,
+    title: "Design",
+    description: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, sequi?",
+    startDate: "20 MAY 2025",
+    endDate: "20 MAY 2025",
+    status: "Pending",
+  },
+  {
+    id: 2,
+    title: "Development",
+    description: "Implement the backend APIs",
+    startDate: "21 MAY 2025",
+    endDate: "25 MAY 2025",
+    status: "In Progress",
+  },
+  {
+    id: 3,
+    title: "Testing",
+    description: "Perform final QA checks",
+    startDate: "26 MAY 2025",
+    endDate: "28 MAY 2025",
+    status: "Completed",
+  },
+
+
+   {
+    id: 1,
+    title: "Design",
+    description: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, sequi?",
+    startDate: "20 MAY 2025",
+    endDate: "20 MAY 2025",
+    status: "Pending",
+  },
+  {
+    id: 2,
+    title: "Development",
+    description: "Implement the backend APIs",
+    startDate: "21 MAY 2025",
+    endDate: "25 MAY 2025",
+    status: "In Progress",
+  },
+  {
+    id: 3,
+    title: "Testing",
+    description: "Perform final QA checks",
+    startDate: "26 MAY 2025",
+    endDate: "28 MAY 2025",
+    status: "Completed",
+  },
+];

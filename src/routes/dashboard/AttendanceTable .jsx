@@ -7,6 +7,8 @@ import AddUpdateEmployee from "@/pages/AddUpdateEmployee";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DatePickerWithRange from "@/components/DatePickerWithRange";
+import useAttendance from "@/hooks/useAttendance";
+import { toast } from "sonner";
 
 const AttendanceTable = ({ attendanceRecords }) => {
     const [sheetOpen, setSheetOpen] = useState(false);
@@ -16,10 +18,13 @@ const AttendanceTable = ({ attendanceRecords }) => {
         fullname: "",
         dateRange: undefined,
     });
-    const [filteredRecords, setFilteredRecords] = useState([]);
+    const [filteredRecords, setFilteredRecords] = useState(attendanceRecords || []);
+
+    const { deleteAttendance, getMyAttendance } = useAttendance();
 
     useEffect(() => {
-        applyFilters(); // apply on initial load
+        setFilteredRecords(attendanceRecords || []);
+        applyFilters();
     }, [attendanceRecords]);
 
     const handleFilterChange = (e) => {
@@ -38,14 +43,18 @@ const AttendanceTable = ({ attendanceRecords }) => {
     };
 
     const applyFilters = () => {
-        let result = [...attendanceRecords];
+        let result = [...(attendanceRecords || [])]; 
 
         if (filters.empId) {
-            result = result.filter((record) => record.userId?.empId?.toString().toLowerCase().includes(filters.empId.toLowerCase()));
+            result = result.filter((record) => 
+                record.userId?.empId?.toString().toLowerCase().includes(filters.empId.toLowerCase())
+            );
         }
 
         if (filters.fullname) {
-            result = result.filter((record) => record.userId?.fullname?.toLowerCase().includes(filters.fullname.toLowerCase()));
+            result = result.filter((record) => 
+                record.userId?.fullname?.toLowerCase().includes(filters.fullname.toLowerCase())
+            );
         }
 
         if (filters.dateRange?.from && filters.dateRange?.to) {
@@ -68,14 +77,34 @@ const AttendanceTable = ({ attendanceRecords }) => {
             dateRange: undefined,
         };
         setFilters(resetState);
-        setFilteredRecords(attendanceRecords);
+        setFilteredRecords(attendanceRecords || []);
     };
 
-    
-const openEditModal = (record) => {
-  setSelectedRecord(record);
-  setSheetOpen(true);
+    const openEditModal = (record) => {
+        setSelectedRecord(record);
+        setSheetOpen(true);
+    };
+
+const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this attendance record?")) {
+        return;
+    }
+    try {
+        const success = await deleteAttendance(id);
+        if (success) {
+            // Update the local state immediately for better UX
+            setFilteredRecords(prevRecords => 
+                (prevRecords || []).filter(record => record._id !== id)
+            );
+            // Then refetch to ensure data consistency
+            await getMyAttendance();
+        }
+    } catch (error) {
+        toast.error("Failed to delete attendance record");
+        console.error("Delete error:", error);
+    }
 };
+
 
     return (
         <div>
@@ -125,40 +154,51 @@ const openEditModal = (record) => {
                                 <TableHead>Action</TableHead>
                                 <TableHead>Employee ID</TableHead>
                                 <TableHead>Employee Name</TableHead>
-                                <TableHead>Employee Email</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Punch In</TableHead>
+                                <TableHead>Punch-In Location</TableHead>
                                 <TableHead>Punch Out</TableHead>
+                                <TableHead>Punch-out Location</TableHead>
                                 <TableHead>Duration</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredRecords?.length ? (
+                            {(filteredRecords || []).length ? (
                                 filteredRecords.map((record, index) => (
                                     <TableRow key={index}>
                                         <TableCell>
                                             <div className="flex items-center gap-x-4">
-                                               <button
-  className="text-blue-500 dark:text-blue-600"
-  onClick={() => openEditModal(record)}
->
-  <PencilLine size={20} />
-</button>
+                                                <button
+                                                    className="text-blue-500 dark:text-blue-600"
+                                                    onClick={() => openEditModal(record)}
+                                                >
+                                                    <PencilLine size={20} />
+                                                </button>
+                                                {/* <button
+                                                    className="text-red-600 hover:text-red-700"
+                                                    onClick={() => handleDelete(record._id)}
+                                                    title="Delete record"
+                                                >
+                                                    <Trash size={20} />
+                                                </button> */}
                                             </div>
                                         </TableCell>
                                         <TableCell>{record.userId?.empId || "-"}</TableCell>
                                         <TableCell>{record.userId?.fullname || "Unknown"}</TableCell>
-                                        <TableCell>{record.userId?.email || "Unknown"}</TableCell>
+
                                         <TableCell>{formatDateSafe(record.createdAt, "dd MMM yyyy")}</TableCell>
-                                        <TableCell className="font-semibold text-green-500">{formatDateSafe(record.punchIn, "h:mm a")}</TableCell>
+                                        <TableCell className="font-semibold text-green-500">
+                                            {record.punchIn ? formatDateSafe(record.punchIn, "h:mm a") : "Not punched in"}
+                                        </TableCell>
+
+                                        <TableCell>{record.punchInLocationName}</TableCell>
                                         <TableCell className={`font-semibold ${record.punchOut ? "text-red-500" : "text-black dark:text-white"}`}>
                                             {record.punchOut ? formatDateSafe(record.punchOut, "h:mm a") : "Not punched out"}
                                         </TableCell>
 
+                                        <TableCell>{record.punchOutLocationName}</TableCell>
                                         <TableCell
-                                            className={`font-semibold ${
-                                                calculateDuration(record.punchIn, record.punchOut) === "N/A" ? "dark:text-white" : "text-blue-500"
-                                            }`}
+                                            className={`font-semibold ${!record.punchIn || !record.punchOut ? "dark:text-white" : "text-blue-500"}`}
                                         >
                                             {calculateDuration(record.punchIn, record.punchOut)}
                                         </TableCell>
@@ -179,17 +219,16 @@ const openEditModal = (record) => {
                 </CardContent>
             </Card>
 
-         <AddUpdateEmployee
-  open={sheetOpen}
-  setOpen={setSheetOpen}
-  record={selectedRecord}
-  onUpdate={(updatedRecord) => {
-    setFilteredRecords((prev) =>
-      prev.map((r) => (r._id === updatedRecord._id ? updatedRecord : r))
-    );
-  }}
-/>
-
+            <AddUpdateEmployee
+                open={sheetOpen}
+                setOpen={setSheetOpen}
+                record={selectedRecord}
+                onUpdate={(updatedRecord) => {
+                    setFilteredRecords((prev) => 
+                        prev.map((r) => (r._id === updatedRecord._id ? updatedRecord : r))
+                    );
+                }}
+            />
         </div>
     );
 };

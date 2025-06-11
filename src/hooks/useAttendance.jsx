@@ -9,52 +9,92 @@ import {
     punchOutFailure,
     getMyAttendanceStart,
     getMyAttendanceSuccess,
-    getMyAttendanceFailure
+    getMyAttendanceFailure,
+    deleteAttendanceStart,
+    deleteAttendanceSuccess,
+    deleteAttendanceFailure,
 } from "../redux/attendanceSlice";
 import axios from "axios";
 import { ATTENDANCE_API_END_POINT } from "@/constants/index";
 
 const useAttendance = () => {
     const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
+    const { token } = useSelector((state) => state.auth);
 
-   const punchIn = async () => {
-    try {
-      dispatch(punchInStart());
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+    const getLocationName = async (lat, lng) => {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+            headers: {
+                "User-Agent": "my-attendance-app (fsayed620@gmail.com)",
+            },
+        });
+        const data = await res.json();
+        return data.display_name;
+    };
 
-      const res = await axios.post(`${ATTENDANCE_API_END_POINT}/punch-in`, {}, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        withCredentials: true
-      });
-      
-      dispatch(punchInSuccess(res.data));
-      toast.success("Punched in successfully");
-      return res.data;
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message;
-      dispatch(punchInFailure(errorMsg));
-      toast.error(errorMsg);
-      throw error;
-    }
-  };
+    const punchIn = async () => {
+        try {
+            dispatch(punchInStart());
 
-  const punchOut = async () => {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+            });
+
+            const { latitude, longitude } = position.coords;
+            const locationName = await getLocationName(latitude, longitude);
+
+            const res = await axios.post(
+                `${ATTENDANCE_API_END_POINT}/punch-in`,
+                {
+                    locationName,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                },
+            );
+
+            dispatch(punchInSuccess(res.data));
+            toast.success("Punched in successfully");
+        } catch (error) {
+            dispatch(punchInFailure(error.message));
+            toast.error(error.message);
+        }
+    };
+
+    const punchOut = async () => {
         try {
             dispatch(punchOutStart());
-            // const token = localStorage.getItem("token");
-            const res = await axios.post(`${ATTENDANCE_API_END_POINT}/punch-out`, {}, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
+
+            // Get user's current geolocation
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
             });
+
+            const { latitude, longitude } = position.coords;
+
+            // Reverse geocode using Nominatim (OpenStreetMap)
+            const locationRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            const locationData = await locationRes.json();
+            const locationName = locationData.display_name || "Unknown location";
+
+            // Send location to backend
+            const res = await axios.post(
+                `${ATTENDANCE_API_END_POINT}/punch-out`,
+                {
+                    locationName,
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
             dispatch(punchOutSuccess(res.data));
             toast.success("Punched out successfully");
         } catch (error) {
@@ -63,15 +103,15 @@ const useAttendance = () => {
         }
     };
 
-       const getMyAttendance = async () => {
+    const getMyAttendance = async () => {
         try {
             dispatch(getMyAttendanceStart());
             // const token = localStorage.getItem("token");
             const res = await axios.get(`${ATTENDANCE_API_END_POINT}/user-all`, {
                 withCredentials: true,
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
             dispatch(getMyAttendanceSuccess(res.data));
         } catch (error) {
@@ -79,7 +119,23 @@ const useAttendance = () => {
         }
     };
 
-    return { punchIn, punchOut, getMyAttendance };
+ const deleteAttendance = async (id) => {
+    try {
+        dispatch(deleteAttendanceStart());
+
+        await axios.delete(`${ATTENDANCE_API_END_POINT}/delete/${id}`);
+
+        dispatch(deleteAttendanceSuccess(id));
+        toast.success("Attendance record deleted successfully");
+         return true; 
+    } catch (error) {
+        dispatch(deleteAttendanceFailure(error.response?.data?.message || error.message));
+        toast.error(error.response?.data?.message || "Failed to delete attendance record");
+         return false; 
+    }
+};
+
+    return { punchIn, punchOut, getMyAttendance, deleteAttendance };
 };
 
 export default useAttendance;

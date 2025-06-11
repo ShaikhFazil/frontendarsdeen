@@ -235,7 +235,7 @@ const DashboardPage = () => {
                 <div className="card-body p-0">
                     <div className="relative h-[500px] w-full flex-shrink-0 overflow-auto rounded-none [scrollbar-width:_thin]">
                         {user?.role === "admin" ? (
-                            <AttendanceTable attendanceRecords={attendanceRecords} />
+                            <AttendanceTable attendanceRecords={attendanceRecords || []} />
                         ) : (
                             <EmployeeAttendanceTable
                                 attendanceRecords={userAttendanceRecords}

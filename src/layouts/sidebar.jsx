@@ -9,8 +9,12 @@ import logoDark from "@/assets/black.png";
 import { cn } from "@/utils/cn";
 
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+import AdminRoute from "@/utils/AdminRoute";
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
+    const { user } = useSelector((state) => state.auth);
+
     return (
         <aside
             ref={ref}
@@ -20,11 +24,11 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 collapsed ? "max-md:-left-full" : "max-md:left-0",
             )}
         >
-            <div className="flex gap-x-3 p-3 w-20">
+            <div className="flex w-20 gap-x-3 p-3">
                 <img
                     src={logoDark}
                     alt="Logoipsum"
-                    className="dark:hidden w-24"
+                    className="w-24 dark:hidden"
                 />
                 <img
                     src={logoLight}
@@ -40,19 +44,35 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                         className={cn("sidebar-group", collapsed && "md:items-center")}
                     >
                         <p className={cn("sidebar-group-title", collapsed && "md:w-[45px]")}>{navbarLink.title}</p>
-                        {navbarLink.links.map((link) => (
-                            <NavLink
-                                key={link.label}
-                                to={link.path}
-                                className={cn("sidebar-item", collapsed && "md:w-[45px]")}
-                            >
-                                <link.icon
-                                    size={22}
-                                    className="flex-shrink-0"
-                                />
-                                {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
-                            </NavLink>
-                        ))}
+                        {navbarLink.links.map((link) =>
+                            link.path === "/task" ? (
+                                user?.role !== "admin" && (
+                                    <NavLink
+                                        key={link.label}
+                                        to={link.path}
+                                        className={cn("sidebar-item", collapsed && "md:w-[45px]")}
+                                    >
+                                        <link.icon
+                                            size={22}
+                                            className="flex-shrink-0"
+                                        />
+                                        {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
+                                    </NavLink>
+                                )
+                            ) : (
+                                <NavLink
+                                    key={link.label}
+                                    to={link.path}
+                                    className={cn("sidebar-item", collapsed && "md:w-[45px]")}
+                                >
+                                    <link.icon
+                                        size={22}
+                                        className="flex-shrink-0"
+                                    />
+                                    {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
+                                </NavLink>
+                            ),
+                        )}
                     </nav>
                 ))}
             </div>

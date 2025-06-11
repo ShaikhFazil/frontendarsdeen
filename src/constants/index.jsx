@@ -1,7 +1,4 @@
-import { ChartColumn, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
-
-import ProfileImage from "@/assets/profile-image.jpg";
-import ProductImage from "@/assets/product-image.jpg";
+import { TriangleAlert , Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
 
 export const navbarLinks = [
     {
@@ -14,8 +11,8 @@ export const navbarLinks = [
             },
             {
                 label: "Task",
-                icon: ChartColumn,
-                path: "/analytics",
+                icon: NotepadText,
+                path: "/task",
             },
             // {
             //     label: "Reports",
@@ -272,12 +269,14 @@ export const navbarLinks = [
 //     },
 // ];
 
-export const backend_url = "https://updatedbackend-2.onrender.com/api"
+// export const backend_url = "https://updatedbackend-2.onrender.com/api"
 
 // http://localhost:3000
 
-// export const backend_url = "http://localhost:8000/api"
+export const backend_url = "http://localhost:8000/api"
 
 export const USER_API_END_POINT = `${backend_url}/v1/user`;
 
 export const ATTENDANCE_API_END_POINT = `${backend_url}/v1/attendance`;
+
+export const TASK_API_END_POINT = `${backend_url}/v1/task`;

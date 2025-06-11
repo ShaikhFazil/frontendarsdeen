@@ -67,7 +67,21 @@ const attendanceSlice = createSlice({
     getAllAttendanceFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
-    }
+    },
+     deleteAttendanceStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteAttendanceSuccess: (state, action) => {
+      state.loading = false;
+      state.attendanceList = state.attendanceList.filter(
+        (record) => record._id !== action.payload
+      );
+    },
+    deleteAttendanceFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   }
 });
 
@@ -83,7 +97,10 @@ export const {
   getMyAttendanceFailure,
   getAllAttendanceStart,
   getAllAttendanceSuccess,
-  getAllAttendanceFailure
+  getAllAttendanceFailure,
+  deleteAttendanceStart,
+  deleteAttendanceSuccess,
+  deleteAttendanceFailure,
 } = attendanceSlice.actions;
 
 export default attendanceSlice.reducer;
