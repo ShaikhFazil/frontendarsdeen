@@ -14,11 +14,11 @@ export const navbarLinks = [
                 icon: NotepadText,
                 path: "/task",
             },
-            // {
-            //     label: "Reports",
-            //     icon: NotepadText,
-            //     path: "/reports",
-            // },
+            {
+                label: "Employee Tasks",
+                icon: NotepadText,
+                path: "/employeetask",
+            },
         ],
     },
     // {

@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
+import DatePickerField from "@/components/DatePickerField";
 
 const CreateTaskDialog = ({ open, onOpenChange, onCreate }) => {
     const [formData, setFormData] = useState({
@@ -62,37 +64,30 @@ const CreateTaskDialog = ({ open, onOpenChange, onCreate }) => {
 
                         <div className="grid gap-2">
                             <Label htmlFor="description">Description</Label>
-                            <Input
+                            <Textarea
+                                placeholder="Type your task here."
                                 id="description"
                                 name="description"
-                                value={formData.description}
                                 onChange={handleChange}
-                                placeholder="Enter description"
                                 required
                             />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="startDate">Start Date</Label>
-                            <Input
-                                type="date"
-                                id="startDate"
+                            <DatePickerField
+                                label="Start Date"
                                 name="startDate"
                                 value={formData.startDate}
                                 onChange={handleChange}
-                                required
                             />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="endDate">End Date</Label>
-                            <Input
-                                type="date"
-                                id="endDate"
+                            <DatePickerField
+                                label="End Date"
                                 name="endDate"
                                 value={formData.endDate}
                                 onChange={handleChange}
-                                required
                             />
                         </div>
 

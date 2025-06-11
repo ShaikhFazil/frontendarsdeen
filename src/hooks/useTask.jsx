@@ -21,21 +21,27 @@ const useTask = () => {
   const dispatch = useDispatch();
   const { token, role } = useSelector((state) => state.auth);
 
-  const fetchTasks = async () => {
-    try {
-      dispatch(fetchTasksStart());
-      const res = await axios.get(TASK_API_END_POINT, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-      dispatch(fetchTasksSuccess(res.data));
-    } catch (error) {
-      dispatch(fetchTasksFailure(error.message));
-      toast.error("Failed to fetch tasks");
-    }
-  };
+const fetchTasks = async () => {
+  try {
+    dispatch(fetchTasksStart());
+    const res = await axios.get(TASK_API_END_POINT, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    });
+
+    const { tasks, count } = res.data;
+
+  dispatch(fetchTasksSuccess({ tasks, count }));
+
+  } catch (error) {
+    dispatch(fetchTasksFailure(error.message));
+    toast.error("Failed to fetch tasks");
+  }
+};
+
+
 
   const createTask = async (taskData) => {
     try {

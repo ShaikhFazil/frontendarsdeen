@@ -44,9 +44,9 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                         className={cn("sidebar-group", collapsed && "md:items-center")}
                     >
                         <p className={cn("sidebar-group-title", collapsed && "md:w-[45px]")}>{navbarLink.title}</p>
-                        {navbarLink.links.map((link) =>
-                            link.path === "/task" ? (
-                                user?.role !== "admin" && (
+                        {navbarLink.links.map((link) => {
+                            if (link.path === "/task") {
+                                return user?.role !== "admin" ? (
                                     <NavLink
                                         key={link.label}
                                         to={link.path}
@@ -58,8 +58,26 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                                         />
                                         {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
                                     </NavLink>
-                                )
-                            ) : (
+                                ) : null;
+                            }
+
+                            if (link.path === "/employeetask") {
+                                return user?.role === "employee" ? null : (
+                                    <NavLink
+                                        key={link.label}
+                                        to={link.path}
+                                        className={cn("sidebar-item", collapsed && "md:w-[45px]")}
+                                    >
+                                        <link.icon
+                                            size={22}
+                                            className="flex-shrink-0"
+                                        />
+                                        {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
+                                    </NavLink>
+                                );
+                            }
+
+                            return (
                                 <NavLink
                                     key={link.label}
                                     to={link.path}
@@ -71,8 +89,8 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                                     />
                                     {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
                                 </NavLink>
-                            ),
-                        )}
+                            );
+                        })}
                     </nav>
                 ))}
             </div>

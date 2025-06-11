@@ -1,41 +1,38 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const TaskTabs = () => {
-    return (
-        <div>
-            <Tabs
-                defaultValue="all"
-                className="w-full"
-            >
-                <TabsList className="mb-8 grid grid-cols-2 gap-2 sm:flex sm:justify-start lg:mb-0">
-                    <TabsTrigger value="all">
-                        <div className="flex items-center gap-2">
-                            All
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">5</span>
-                        </div>
-                    </TabsTrigger>
-                    <TabsTrigger value="pending">
-                        <div className="flex items-center gap-2">
-                            Pending
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">3</span>
-                        </div>
-                    </TabsTrigger>
-                    <TabsTrigger value="in-progress">
-                        <div className="flex items-center gap-2">
-                            In Progress
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-xs text-white">3</span>
-                        </div>
-                    </TabsTrigger>
-                    <TabsTrigger value="completed">
-                        <div className="flex items-center gap-2">
-                            Completed
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-xs text-white">3</span>
-                        </div>
-                    </TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
-    );
+const TaskTabs = ({ value, onChange, counts = {} }) => {
+  const getCount = (key) => {
+    if (key === "all") return counts.total || 0;
+
+    const mapping = {
+      pending: "Pending",
+      "in-progress": "In Progress",
+      completed: "Completed",
+    };
+
+    return counts[mapping[key]] || 0;
+  };
+
+  return (
+    <div>
+      <Tabs value={value} onValueChange={onChange} className="w-full">
+        <TabsList className="mb-8 grid grid-cols-2 gap-2 sm:flex sm:justify-start lg:mb-0">
+          {["all", "pending", "in-progress", "completed"].map((status) => (
+            <TabsTrigger key={status} value={status}>
+              <div className="flex items-center gap-2 capitalize">
+                {status.replace("-", " ")}
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                  {getCount(status)}
+                </span>
+              </div>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </div>
+  );
 };
 
+
 export default TaskTabs;
+
