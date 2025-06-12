@@ -33,7 +33,7 @@ const fetchTasks = async () => {
     });
 
     const { tasks, count } = res.data;
-
+console.log(tasks)
   dispatch(fetchTasksSuccess({ tasks, count }));
 
   } catch (error) {

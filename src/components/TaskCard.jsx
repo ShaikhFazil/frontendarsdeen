@@ -9,8 +9,8 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
     const darkBorder = getDarkBorder(task.status);
     const badgeColor = getBadgeBg(task.status);
 
-    // Only show edit/delete if user is admin or task creator
-    const canEdit = isAdmin || task.createdBy._id === userId;
+    // const canEdit = isAdmin || (task.createdBy && task.createdBy._id === userId);
+    console.log(task);
 
     return (
         <div className={`w-full rounded-md border border-l-[5px] border-gray-300 px-2 ${lightBorder} dark:border-0 dark:border-gray-700`}>
@@ -27,7 +27,7 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
                                     className="cursor-pointer hover:text-blue-500"
                                     onClick={() => onEdit?.(task)}
                                 >
-                                    <PencilLine size={20} /> 
+                                    <PencilLine size={20} />
                                 </button>
                                 <button
                                     className="cursor-pointer text-red-600 hover:text-red-700"
@@ -58,7 +58,7 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
                         </div>
                     </div>
                     {user.role === "admin" && (
-                        <div className="text-sm text-gray-500 mb-4">Created by: {task.createdBy.fullname || task.createdBy.email}</div>
+                        <div className="mb-4 text-sm text-gray-500">Created by: {task.createdBy?.fullname || task.createdBy?.email || "Unknown"}</div>
                     )}
                 </div>
             </div>

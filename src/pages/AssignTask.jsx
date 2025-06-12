@@ -86,22 +86,22 @@ const AssignTask = ({ statusFilter }) => {
                     </div>
                 )}
 
-               <div className="mb-4 flex items-center justify-end gap-2">
-  <DatePickerField
-    name="taskDate"
-    value={selectedDate}
-    onChange={(e) => setSelectedDate(e.target.value)}
-  />
-  <Button
-    variant="destructive"
-    onClick={handleResetFilters}
-    disabled={!selectedDate}
-    className="h-10"
-  >
-    <X className="h-4 w-4" />
-    <span className="sr-only md:not-sr-only">Reset</span>
-  </Button>
-</div>
+                <div className="mb-4 flex items-center justify-end gap-2">
+                    <DatePickerField
+                        name="taskDate"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                    />
+                    <Button
+                        variant="destructive"
+                        onClick={handleResetFilters}
+                        disabled={!selectedDate}
+                        className="h-10"
+                    >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only md:not-sr-only">Reset</span>
+                    </Button>
+                </div>
 
                 {filteredByDateTasks.length === 0 ? (
                     <div className="mt-6 text-center text-slate-500 dark:text-slate-300">No tasks found for the selected filters.</div>
