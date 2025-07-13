@@ -5,14 +5,16 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import DatePickerField from "./DatePickerField";
+import MultiSelect  from "@/pages/MultiSelect";
 
-const EditTaskSheet = ({ task, open, onOpenChange, onSave }) => {
+const EditTaskSheet = ({ task, open, onOpenChange, onSave, isAdmin = false, users = []  }) => {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         status: "Pending",
         startDate: "",
         endDate: "",
+    assignedTo: [],
     });
 
     useEffect(() => {
@@ -29,6 +31,7 @@ const EditTaskSheet = ({ task, open, onOpenChange, onSave }) => {
                 status: task.status || "Pending",
                 startDate: formatDateForInput(task.startDate),
                 endDate: formatDateForInput(task.endDate),
+                 assignedTo: task.assignedTo?.map(a => a.user._id) || [],
             });
         }
     }, [task]);
@@ -41,23 +44,25 @@ const EditTaskSheet = ({ task, open, onOpenChange, onSave }) => {
         }));
     };
 
+ const handleUserSelect = (selectedUserIds) => {
+        setFormData(prev => ({
+            ...prev,
+            assignedTo: selectedUserIds
+        }));
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (task) {
-            const updatedTask = {
-                ...task,
-                _id: task._id,
-                title: formData.title,
-                description: formData.description,
-                status: formData.status,
-                startDate: formData.startDate,
-                endDate: formData.endDate,
-            };
-            onSave(updatedTask);
-        }
+        onSave(formData);
     };
 
     if (!task) return null;
+
+     const userOptions = users.map(user => ({
+        value: user._id,
+        label: user.fullname || user.email
+    }));
+
 
     return (
         <Sheet
@@ -91,6 +96,19 @@ const EditTaskSheet = ({ task, open, onOpenChange, onSave }) => {
                                 required
                             />
                         </div>
+
+                           {isAdmin && (
+                            <div className="grid gap-2">
+                                <Label>Assign To</Label>
+                                <MultiSelect
+                                    options={userOptions}
+                                    selected={formData.assignedTo}
+                                    onChange={handleUserSelect}
+                                    placeholder="Select employees..."
+                                />
+                            </div>
+                        )}
+                        
                         <div className="grid gap-3">
                             <DatePickerField
                                 label="Start Date"

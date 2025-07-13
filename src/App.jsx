@@ -9,11 +9,14 @@ import Signup from "@/auth/Signup";
 import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { setUser } from "./redux/authSlice";
-import axios from '@/utils/axiosConfig';
+import axios from "@/utils/axiosConfig";
 import Task from "./components/Task";
 import AdminRoute from "./utils/AdminRoute";
 import EmployeeRoute from "./utils/EmployeeRoute";
 import EmployeeTask from "./components/EmployeeTask";
+import RoleBasedAccess from "./pages/RoleBasedAccess";
+import AdminAssign from "./components/AdminAssign";
+import EmployeeLeave from "./components/EmployeeLeave";
 
 // const PrivateRoute = ({ children }) => {
 //   const { user, token } = useSelector((state) => state.auth);
@@ -41,97 +44,127 @@ import EmployeeTask from "./components/EmployeeTask";
 // };
 
 const PrivateRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    // Set up response interceptor for this component
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401 || error.response?.status === 500) {
-          return Promise.reject(error);
-        }
-        return Promise.reject(error);
-      }
-    );
+    useEffect(() => {
+        // Set up response interceptor for this component
+        const interceptor = axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response?.status === 401 || error.response?.status === 500) {
+                    return Promise.reject(error);
+                }
+                return Promise.reject(error);
+            },
+        );
 
-    return () => {
-      // Clean up interceptor
-      axios.interceptors.response.eject(interceptor);
-    };
-  }, []);
+        return () => {
+            // Clean up interceptor
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, []);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+    if (!user) {
+        return (
+            <Navigate
+                to="/login"
+                replace
+            />
+        );
+    }
 
-  return children;
+    return children;
 };
 
 function App() {
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            // You might want to verify the token with your backend here
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            // Don't dispatch setUser here - let redux-persist handle it
+        }
+    }, [dispatch]);
 
- const dispatch = useDispatch();
-
-useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    // You might want to verify the token with your backend here
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    // Don't dispatch setUser here - let redux-persist handle it
-  }
-}, [dispatch]);
-
-  const router = createBrowserRouter([
-    {
-      path: "/login",
-      element: <Login />,
-    },
-    {
-      path: "/signup",
-      element: <Signup />,
-    },
-       {
-      path: "*",
-      element: <NotFound />,
-    },
-    {
-      path: "/",
-      element: (
-        <PrivateRoute>
-          <Layout />
-        </PrivateRoute>
-      ),
-      children: [
+    const router = createBrowserRouter([
         {
-          index: true,
-          element: <DashboardPage />,
+            path: "/login",
+            element: <Login />,
         },
         {
-          path: "task",
-          element: (
-            <AdminRoute>
-              <Task />
-            </AdminRoute>
-          ),
+            path: "/signup",
+            element: <Signup />,
         },
         {
-          path: "employeetask",
-          element: (
-            <EmployeeRoute>
-              <EmployeeTask />
-            </EmployeeRoute>
-          ),
+            path: "*",
+            element: <NotFound />,
         },
-      ],
-    },
-  ]);
+        {
+            path: "/",
+            element: (
+                <PrivateRoute>
+                    <Layout />
+                </PrivateRoute>
+            ),
+            children: [
+                {
+                    index: true,
+                    element: <DashboardPage />,
+                },
+                {
+                    path: "task",
+                    element: (
+                        <AdminRoute>
+                            <Task />
+                        </AdminRoute>
+                    ),
+                },
+                {
+                    path: "employeetask",
+                    element: (
+                        <EmployeeRoute>
+                            <EmployeeTask />
+                        </EmployeeRoute>
+                    ),
+                },
+                {
+                    path: "rolebased",
+                    element: (
+                        <EmployeeRoute>
+                            <RoleBasedAccess />
+                        </EmployeeRoute>
+                    ),
+                },
+                {
+                    path: "adminassign",
+                    element: (
+                        <EmployeeRoute>
+                            <AdminAssign />
+                        </EmployeeRoute>
+                    ),
+                },
+                {
+                    path: "leave",
+                    element: (
+                        // <AdminRoute>
+                            <EmployeeLeave />
+                        // </AdminRoute>
+                    ),
+                },
+            ],
+        },
+    ]);
 
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <RouterProvider router={router} />
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider
+            defaultTheme="light"
+            storageKey="vite-ui-theme"
+        >
+            <RouterProvider router={router} />
+        </ThemeProvider>
+    );
 }
 
 export default App;

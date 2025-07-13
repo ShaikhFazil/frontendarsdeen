@@ -11,7 +11,9 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import attendanceReducer from "./attendanceSlice.js";
-import taskReducer from "./taskSlice.js"
+import taskReducer from "./taskSlice.js";
+import userReducer from "./userSlice.js";
+import leaveReducer from "./leaveSlice.js";
 
 const persistConfig = {
   key: "root",
@@ -23,7 +25,9 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authSlice,
   attendance: attendanceReducer,
-  task: taskReducer
+  task: taskReducer,
+  user:userReducer,
+  leave: leaveReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -61,7 +61,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                                 ) : null;
                             }
 
-                            if (link.path === "/employeetask") {
+                            if (link.path === "/employeetask" || link.path === "/rolebased") {
                                 return user?.role === "employee" ? null : (
                                     <NavLink
                                         key={link.label}
