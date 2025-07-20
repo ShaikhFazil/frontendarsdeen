@@ -149,7 +149,7 @@ function App() {
                     path: "leave",
                     element: (
                         // <AdminRoute>
-                            <EmployeeLeave />
+                        <EmployeeLeave />
                         // </AdminRoute>
                     ),
                 },

@@ -1,4 +1,4 @@
-import { TriangleAlert , Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
+import { TriangleAlert, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
 
 export const navbarLinks = [
     {
@@ -19,17 +19,17 @@ export const navbarLinks = [
                 icon: NotepadText,
                 path: "/employeetask",
             },
-             {
+            {
                 label: "Role Based Access",
                 icon: Users,
                 path: "/rolebased",
             },
-             {
+            {
                 label: "Leave",
                 icon: Users,
                 path: "/leave",
             },
-              
+
         ],
     },
     // {

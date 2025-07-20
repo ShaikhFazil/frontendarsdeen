@@ -165,9 +165,9 @@ const AttendanceTable = ({ attendanceRecords }) => {
                 <TableHead>Employee Name</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Punch In</TableHead>
-                <TableHead>Punch-In Location</TableHead>
+                {/* <TableHead>Punch-In Location</TableHead> */}
                 <TableHead>Punch Out</TableHead>
-                <TableHead>Punch-out Location</TableHead>
+                {/* <TableHead>Punch-out Location</TableHead> */}
                 <TableHead>Duration</TableHead>
               </TableRow>
             </TableHeader>
@@ -191,11 +191,11 @@ const AttendanceTable = ({ attendanceRecords }) => {
                     <TableCell className="font-semibold text-green-500">
                       {record.punchIn ? formatDateSafe(record.punchIn, "h:mm a") : "Not punched in"}
                     </TableCell>
-                    <TableCell>{record.punchInLocationName}</TableCell>
+                    {/* <TableCell>{record.punchInLocationName}</TableCell> */}
                     <TableCell className={`font-semibold ${record.punchOut ? "text-red-500" : "text-black dark:text-white"}`}>
                       {record.punchOut ? formatDateSafe(record.punchOut, "h:mm a") : "Not punched out"}
                     </TableCell>
-                    <TableCell>{record.punchOutLocationName}</TableCell>
+                    {/* <TableCell>{record.punchOutLocationName}</TableCell> */}
                     <TableCell className={`font-semibold ${!record.punchIn || !record.punchOut ? "dark:text-white" : "text-blue-500"}`}>
                       {calculateDuration(record.punchIn, record.punchOut)}
                     </TableCell>
