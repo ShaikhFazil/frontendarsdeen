@@ -132,6 +132,13 @@ const submitHandler = async (e) => {
                                 />
                             )}
                         </div>
+                        <Link
+  to="/forgot-password"
+  className="text-sm text-blue-600 block mt-2"
+>
+  Forgot Password?
+</Link>
+
                     </div>
 
                     {loading ? (

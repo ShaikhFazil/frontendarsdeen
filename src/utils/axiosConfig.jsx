@@ -23,33 +23,40 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // Handle token expiration (401) and server errors (500)
-      if (error.response.status === 401 || error.response.status === 500) {
-        // Clear auth state
+      const { status, data } = error.response;
+      const message = data?.message || 'Something went wrong';
+
+      // 🔴 ONLY handle auth failure
+      if (status === 401 && message.toLowerCase().includes('token')) {
+        toast.error('Session expired. Please login again.');
+
+        // Clear auth only for token issues
         store.dispatch(logout());
         localStorage.removeItem('token');
         delete axiosInstance.defaults.headers.common['Authorization'];
-        
-        // Show error message
-        const errorMsg = error.response.status === 401 
-          ? 'Session expired. Please login again.' 
-          : 'Internal server error. Please try again.';
-        
-        toast.error(errorMsg);
-        
-        // Redirect to login
+
+        // Redirect ONLY if not already on login
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+      } 
+      // 🟡 All other errors → stay on same page
+      else {
+        toast.error(message);
       }
+    } 
+    // Network / no response error
+    else {
+      toast.error('Network error. Please check your connection.');
     }
+
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;

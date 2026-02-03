@@ -29,6 +29,11 @@ export const navbarLinks = [
                 icon: Users,
                 path: "/leave",
             },
+            {
+                label: "CRM",
+                icon: PackagePlus,
+                path: "/crm",
+            },
 
         ],
     },
@@ -135,11 +140,11 @@ export const navbarLinks = [
 //     },
 // ];
 
-export const backend_url = "https://updatedbackend-2.onrender.com/api"
+export const backend_url = "http://localhost:8000/api"
 
 // http://localhost:3000
 
-// export const backend_url = "http://localhost:8000/api"
+// export const backend_url = "https://api.crm.trendsofmedia.com/api"
 
 export const USER_API_END_POINT = `${backend_url}/v1/user`;
 
@@ -147,4 +152,6 @@ export const ATTENDANCE_API_END_POINT = `${backend_url}/v1/attendance`;
 
 export const TASK_API_END_POINT = `${backend_url}/v1/task`;
 
-export const LEAVE_API_END_POINT = `${backend_url}/leave`;
+export const LEAVE_API_END_POINT = `${backend_url}/v1/leave`;
+
+export const ONBOARDING_API_END_POINT = `${backend_url}/v1/onboarding`;

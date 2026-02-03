@@ -1,4 +1,3 @@
-// AdminAssignTask.js
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { PencilLine, UserCheck, X } from "lucide-react";
@@ -17,27 +16,37 @@ const AdminAssignTask = () => {
     const [selectedDate, setSelectedDate] = useState("");
     const [users, setUsers] = useState([]);
     const { tasks } = useSelector((state) => state.task);
+    const { user } = useSelector((state) => state.auth);
     const { createAdminTask, getAdminTasks, updateAdminTask, deleteAdminTask, getAllUsers } = useTask();
 
     useEffect(() => {
-        getAdminTasks();
+        loadData();
         fetchUsers();
     }, []);
 
-  const fetchUsers = async () => {
-    try {
-        const response = await getAllUsers();
-        if (Array.isArray(response)) {
-            setUsers(response);
-        } else {
-            setUsers([]);
-            toast.error("Failed to fetch users");
+    const loadData = async () => {
+        try {
+            await getAdminTasks();
+        } catch (error) {
+            console.error("Error loading tasks:", error);
+            toast.error("Failed to load tasks");
         }
-    } catch (err) {
-        setUsers([]);
-        toast.error("Error fetching users");
-    }
-};
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await getAllUsers();
+            if (Array.isArray(response)) {
+                setUsers(response);
+            } else {
+                setUsers([]);
+                toast.error("Failed to fetch users");
+            }
+        } catch (err) {
+            setUsers([]);
+            toast.error("Error fetching users");
+        }
+    };
 
     const handleEdit = (task) => {
         setCurrentTask(task);
@@ -48,6 +57,7 @@ const AdminAssignTask = () => {
         const success = await updateAdminTask(updatedTask._id, updatedTask);
         if (success) {
             setIsSheetOpen(false);
+            loadData();
         }
     };
 
@@ -55,6 +65,8 @@ const AdminAssignTask = () => {
         const success = await deleteAdminTask(taskId);
         if (!success) {
             toast.error("Failed to delete task");
+        } else {
+            loadData();
         }
     };
 
@@ -62,15 +74,48 @@ const AdminAssignTask = () => {
         const success = await createAdminTask(taskData);
         if (success) {
             setIsDialogOpen(false);
+            loadData();
         }
     };
 
+    // Filter tasks to only show tasks with assignedTo field that has values
+    const assignedTasks = tasks.filter(task => {
+        // Check if assignedTo exists and has at least one value
+        if (Array.isArray(task.assignedTo)) {
+            return task.assignedTo.length > 0;
+        } else if (typeof task.assignedTo === 'string') {
+            return task.assignedTo.trim() !== '';
+        } else if (task.assignedTo) {
+            // Handle object case if assignedTo is an object
+            return Object.keys(task.assignedTo).length > 0;
+        }
+        return false;
+    });
+
+    // Apply date filter on top of assigned tasks
     const filteredTasks = selectedDate
-        ? tasks.filter((task) => {
-              const taskDate = new Date(task.startDate).toDateString();
-              return taskDate === new Date(selectedDate).toDateString();
-          })
-        : tasks;
+        ? assignedTasks.filter((task) => {
+            const taskDate = new Date(task.createdAt).toDateString();
+            return taskDate === new Date(selectedDate).toDateString();
+        })
+        : assignedTasks;
+
+    // Group tasks by createdAt date, sorted by latest first
+    const groupTasksByCreatedAt = (tasksArray) => {
+        return Object.entries(
+            tasksArray.reduce((acc, task) => {
+                const dateKey = new Date(task.createdAt).toDateString();
+                if (!acc[dateKey]) acc[dateKey] = [];
+                acc[dateKey].push(task);
+                return acc;
+            }, {})
+        )
+        .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
+        .map(([date, tasksInGroup]) => [
+            date,
+            tasksInGroup.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        ]);
+    };
 
     const handleResetFilters = () => {
         setSelectedDate("");
@@ -108,20 +153,21 @@ const AdminAssignTask = () => {
 
                 {filteredTasks.length === 0 ? (
                     <div className="mt-6 text-center text-slate-500 dark:text-slate-300">
-                        No tasks found for the selected filters.
+                        {assignedTasks.length === 0 
+                            ? "No tasks have been assigned yet. Click 'Assign Task' to get started."
+                            : "No tasks found for the selected filters."
+                        }
                     </div>
                 ) : (
-                    Object.entries(
-                        filteredTasks.reduce((acc, task) => {
-                            const dateKey = new Date(task.startDate).toDateString();
-                            if (!acc[dateKey]) acc[dateKey] = [];
-                            acc[dateKey].push(task);
-                            return acc;
-                        }, {}),
-                    ).map(([date, tasksOnDate]) => (
+                    groupTasksByCreatedAt(filteredTasks).map(([date, tasksOnDate]) => (
                         <div key={date} className="mb-6 mt-5 w-full border-b pb-4">
                             <h2 className="mb-2 text-lg font-semibold text-slate-800 dark:text-slate-200">
-                                Start Date: {date}
+                                Created on: {new Date(date).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
                             </h2>
                             <hr className="mb-3 border-red-500" />
                             <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-1">

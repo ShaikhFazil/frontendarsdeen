@@ -14,7 +14,6 @@ import {
     deleteTaskSuccess,
     deleteTaskFailure,
 } from "../redux/taskSlice";
-import axios from "axios";
 import { TASK_API_END_POINT } from "@/constants/index";
 import axiosInstance from "@/utils/axiosConfig";
 
@@ -22,6 +21,7 @@ const useTask = () => {
     const dispatch = useDispatch();
     const { token, role } = useSelector((state) => state.auth);
 
+    // MAIN FETCH - For both admin and employee
     const fetchTasks = async () => {
         try {
             dispatch(fetchTasksStart());
@@ -33,14 +33,40 @@ const useTask = () => {
             });
 
             const { tasks, count } = res.data;
-            console.log(tasks);
+            console.log("Fetched tasks for", role, ":", tasks);
             dispatch(fetchTasksSuccess({ tasks, count }));
         } catch (error) {
+            console.error("Error fetching tasks:", error);
             dispatch(fetchTasksFailure(error.message));
             toast.error("Failed to fetch tasks");
         }
     };
 
+    // ADMIN-ONLY: Get ALL tasks for admin dashboard
+    const getAdminTasks = async () => {
+        try {
+            dispatch(fetchTasksStart());
+            const res = await axiosInstance.get(`${TASK_API_END_POINT}/admin`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+            });
+            
+            const { tasks, counts } = res.data;
+            console.log("Admin dashboard tasks:", tasks);
+            dispatch(fetchTasksSuccess({ 
+                tasks, 
+                count: counts 
+            }));
+        } catch (error) {
+            console.error("Error fetching admin tasks:", error);
+            dispatch(fetchTasksFailure(error.message));
+            toast.error("Failed to fetch tasks");
+        }
+    };
+
+    // Regular task operations
     const createTask = async (taskData) => {
         try {
             dispatch(createTaskStart());
@@ -55,6 +81,7 @@ const useTask = () => {
             toast.success("Task created successfully");
             return true;
         } catch (error) {
+            console.error("Error creating task:", error);
             dispatch(createTaskFailure(error.message));
             toast.error("Failed to create task");
             return false;
@@ -63,24 +90,25 @@ const useTask = () => {
 
     const updateTask = async (id, taskData) => {
         try {
-            dispatch(updateTaskStart());
-            const res = await axiosInstance.put(`${TASK_API_END_POINT}/${id}`, taskData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            });
-            dispatch(updateTaskSuccess(res.data));
-            toast.success("Task updated successfully");
-            return true;
+          dispatch(updateTaskStart());
+          const res = await axiosInstance.put(`${TASK_API_END_POINT}/${id}`, taskData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          });
+          dispatch(updateTaskSuccess(res.data));
+          toast.success("Task updated successfully");
+          return true;
         } catch (error) {
-            dispatch(updateTaskFailure(error.message));
-            toast.error("Failed to update task");
-            return false;
+          console.error("Error updating task:", error);
+          dispatch(updateTaskFailure(error.message));
+          toast.error("Failed to update task");
+          return false;
         }
-    };
-
+      };
+      
     const deleteTask = async (id) => {
         try {
             console.log("Deleting task with ID:", id);
@@ -95,12 +123,14 @@ const useTask = () => {
             toast.success("Task deleted successfully");
             return true;
         } catch (error) {
+            console.error("Error deleting task:", error);
             dispatch(deleteTaskFailure(error.message));
             toast.error("Failed to delete task");
             return false;
         }
     };
 
+    // Admin-only operations
     const createAdminTask = async (taskData) => {
         try {
             dispatch(createTaskStart());
@@ -115,30 +145,10 @@ const useTask = () => {
             toast.success("Task assigned successfully");
             return true;
         } catch (error) {
+            console.error("Error creating admin task:", error);
             dispatch(createTaskFailure(error.message));
             toast.error("Failed to assign task");
             return false;
-        }
-    };
-
-    const getAdminTasks = async () => {
-        try {
-            dispatch(fetchTasksStart());
-            const res = await axiosInstance.get(`${TASK_API_END_POINT}/admin`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                withCredentials: true,
-            });
-            dispatch(
-                fetchTasksSuccess({
-                    tasks: res.data.tasks,
-                    count: res.data.counts,
-                }),
-            );
-        } catch (error) {
-            dispatch(fetchTasksFailure(error.message));
-            toast.error("Failed to fetch tasks");
         }
     };
 
@@ -156,6 +166,7 @@ const useTask = () => {
             toast.success("Task updated successfully");
             return true;
         } catch (error) {
+            console.error("Error updating admin task:", error);
             dispatch(updateTaskFailure(error.message));
             toast.error("Failed to update task");
             return false;
@@ -175,6 +186,7 @@ const useTask = () => {
             toast.success("Task deleted successfully");
             return true;
         } catch (error) {
+            console.error("Error deleting admin task:", error);
             dispatch(deleteTaskFailure(error.message));
             toast.error("Failed to delete task");
             return false;
@@ -189,8 +201,9 @@ const useTask = () => {
                 },
                 withCredentials: true,
             });
-            return res.data.users;
+            return res.data; // Returns array directly
         } catch (error) {
+            console.error("Error fetching users:", error);
             toast.error("Failed to fetch users");
             return [];
         }
@@ -198,11 +211,11 @@ const useTask = () => {
 
     return {
         fetchTasks,
+        getAdminTasks,
         createTask,
         updateTask,
         deleteTask,
         createAdminTask,
-        getAdminTasks,
         updateAdminTask,
         deleteAdminTask,
         getAllUsers,
