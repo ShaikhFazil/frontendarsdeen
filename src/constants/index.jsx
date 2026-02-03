@@ -144,7 +144,7 @@ export const navbarLinks = [
 
 // http://localhost:3000
 
-export const backend_url = "https://api.crm.trendsofmedia.com/api"
+export const backend_url = "https://api.crm.arsdeen.cloud/api"
 
 export const USER_API_END_POINT = `${backend_url}/v1/user`;
 
